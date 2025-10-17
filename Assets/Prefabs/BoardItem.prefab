@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2457276024818638069
 RectTransform:
   m_ObjectHideFlags: 0
@@ -226,7 +226,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 0}
   itemImage: {fileID: 3146219097513563846}
-  levelText: {fileID: 4654257661491545084}
   currentCell: {fileID: 0}
 --- !u!225 &3972925221438252276
 CanvasGroup:

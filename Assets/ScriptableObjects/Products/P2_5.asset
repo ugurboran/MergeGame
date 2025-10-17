@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: P2_5
   m_EditorClassIdentifier: 
   itemID: P2_5
-  level: 2
+  level: 5
   sprite: {fileID: 21300000, guid: b44fc1375d0040e4ea4a3fc0e241c982, type: 3}
   itemType: 1
   familyID: 

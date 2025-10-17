@@ -224,7 +224,12 @@ MonoBehaviour:
   gridLayout: {fileID: 1566184286}
   cellPrefab: {fileID: 3633409833182942759, guid: b3f835e1331bd8c48ad4de5530f8e4a0, type: 3}
   itemPrefab: {fileID: 8534402611815206637, guid: 798038a4a38f7b145b7f4901608c4086, type: 3}
-  startingGenerator: {fileID: 11400000, guid: 4824709e85299c340a4b051f22331ad4, type: 2}
+  starterItems:
+  - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
+  - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
+  - {fileID: 11400000, guid: 52a90c0ef7675e54eb84657d231730fc, type: 2}
+  - {fileID: 11400000, guid: 2fdb758689acba44abd1eeef76c81c74, type: 2}
+  - {fileID: 11400000, guid: 4824709e85299c340a4b051f22331ad4, type: 2}
   allItemData:
   - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
   - {fileID: 11400000, guid: 4250795409af61d4fa87cd9e3d7b8958, type: 2}
@@ -251,6 +256,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 85efbd23fb5821c4db5f693af04c4013, type: 2}
   - {fileID: 11400000, guid: c0399ee5fba2b6d40a7b3c10568c6bdd, type: 2}
   - {fileID: 11400000, guid: 24814874afdbac54db5dd7e6a5c0f2e8, type: 2}
+  mergeParticles: {fileID: 0}
 --- !u!4 &228098545
 Transform:
   m_ObjectHideFlags: 0

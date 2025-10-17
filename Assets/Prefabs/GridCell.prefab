@@ -88,7 +88,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 970feb993cfdf3c4bbd466e149579abc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  row: 0
-  column: 0
+  row: 5
+  column: 5
   backgroundImage: {fileID: 4951961845516349967}
   currentItem: {fileID: 0}
