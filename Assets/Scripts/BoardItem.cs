@@ -92,7 +92,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
             return;
         }
 
-        Debug.Log($"[BoardItem] ?? Generator {itemData.itemID} clicked - Attempting to produce");
+        Debug.Log($"[BoardItem] Generator {itemData.itemID} clicked - Attempting to produce");
         ProduceProduct();
     }
 
@@ -101,7 +101,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         // Check if board has any empty cells at all
         if (!GameBoard.Instance.HasEmptyCell())
         {
-            Debug.Log($"[BoardItem] ?? Board is FULL! {itemData.itemID} cannot produce");
+            Debug.Log($"[BoardItem] Board is FULL! {itemData.itemID} cannot produce");
             // Play "board full" feedback animation
             PlayBoardFullFeedback();
             return;
@@ -132,7 +132,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         }
         else
         {
-            Debug.Log($"[BoardItem] ?? {itemData.itemID} cannot produce - No empty adjacent cells (generator is surrounded)");
+            Debug.Log($"[BoardItem] {itemData.itemID} cannot produce - No empty adjacent cells (generator is surrounded)");
             // Play "blocked" feedback animation
             PlayBlockedFeedback();
         }
@@ -164,7 +164,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
     // IPointerDownHandler - Supports both mouse and touch
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log($"[BoardItem] ?? Pointer down on {itemData.itemID}");
+        Debug.Log($"[BoardItem] Pointer down on {itemData.itemID}");
 
         // If this is a generator, try to produce
         if (itemData.isGenerator)
@@ -227,26 +227,35 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         transform.DORotate(Vector3.zero, 0.2f);
 
         // Check if we're still under Canvas (no valid drop occurred)
+        // The drop handler in GridCell should have already handled the drop if valid
         if (transform.parent == canvas.transform)
         {
-            Debug.Log($"[BoardItem] ? No valid drop target detected - Returning to original position");
+            Debug.Log($"[BoardItem] No valid drop target detected - Returning to original position");
             ReturnToOriginalPosition();
         }
         else
         {
-            Debug.Log($"[BoardItem] ? Drop successful - Now under: {transform.parent.name}");
+            Debug.Log($"[BoardItem] Drop handled - Now under: {transform.parent.name}");
         }
     }
 
     public void ReturnToOriginalPosition()
     {
-        // Animate back to original position
-        transform.DOMove(originalPosition, 0.3f).SetEase(Ease.OutBack).OnComplete(() => {
-            transform.SetParent(originalParent);
-            rectTransform.localPosition = Vector3.zero;
-        });
+        Debug.Log($"[BoardItem] {itemData.itemID} returning to original position at ({currentCell.row}, {currentCell.column})");
 
-        Debug.Log($"[BoardItem] {itemData.itemID} returned to original cell");
+        // Animate back to original position with a "bounce back" effect
+        Sequence returnSeq = DOTween.Sequence();
+
+        // First move to original position
+        returnSeq.Append(transform.DOMove(originalPosition, 0.25f).SetEase(Ease.OutQuad));
+
+        // Then settle into the cell
+        returnSeq.OnComplete(() => {
+            transform.SetParent(originalParent);
+            transform.localPosition = Vector3.zero;
+            transform.localScale = Vector3.one;
+            Debug.Log($"[BoardItem] {itemData.itemID} returned to cell ({currentCell.row}, {currentCell.column})");
+        });
     }
 
     public void MoveToCell(GridCell targetCell)
@@ -270,7 +279,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         transform.DOKill();
         transform.localScale = Vector3.one;
 
-        Debug.Log($"[BoardItem] ? Now in cell ({targetCell.row}, {targetCell.column}), parent: {transform.parent.name}");
+        Debug.Log($"[BoardItem] Now in cell ({targetCell.row}, {targetCell.column}), parent: {transform.parent.name}");
     }
 
     // ==================== ANIMATION EFFECTS ====================
@@ -308,7 +317,7 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         shakeSeq.Join(itemImage.DOColor(Color.red, 0.15f));
         shakeSeq.Append(itemImage.DOColor(Color.white, 0.15f));
 
-        Debug.Log($"[BoardItem] ? Playing blocked feedback for {itemData.itemID}");
+        Debug.Log($"[BoardItem] Playing blocked feedback for {itemData.itemID}");
     }
 
     void PlayBoardFullFeedback()
@@ -322,7 +331,25 @@ public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         fullSeq.Append(itemImage.DOColor(Color.white, 0.15f));
         fullSeq.SetLoops(2);
 
-        Debug.Log($"[BoardItem] ?? Playing board full feedback for {itemData.itemID}");
+        Debug.Log($"[BoardItem] Playing board full feedback for {itemData.itemID}");
+    }
+
+    public void PlayCannotMergeFeedback()
+    {
+        // Shake animation when items can't merge
+        transform.DOKill();
+        itemImage.DOKill();
+
+        Sequence cannotMergeSeq = DOTween.Sequence();
+
+        // Red flash
+        cannotMergeSeq.Append(itemImage.DOColor(Color.red, 0.1f));
+        cannotMergeSeq.Append(itemImage.DOColor(Color.white, 0.1f));
+
+        // Small shake
+        cannotMergeSeq.Join(transform.DOShakePosition(0.2f, strength: 10f, vibrato: 10, randomness: 90f));
+
+        Debug.Log($"[BoardItem] Playing cannot merge feedback for {itemData.itemID}");
     }
 
     public void PlayMergeAnimation(System.Action onComplete)

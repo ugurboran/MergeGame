@@ -1,11 +1,11 @@
 // GameBoard.cs
 // Main board manager - handles grid, merging, and game logic
-// NOW WITH: DOTween animations, Debug.Log statements, Mobile touch support
+// FINAL VERSION - Clean, no duplicates
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening; // DOTween for animations
+using DG.Tweening;
 
 public class GameBoard : MonoBehaviour
 {
@@ -80,18 +80,18 @@ public class GameBoard : MonoBehaviour
             // Check if starterItems list exists and has items
             if (starterItems == null)
             {
-                Debug.LogError("[GameBoard] ? ERROR: starterItems list is NULL! Assign items in Inspector.");
+                Debug.LogError("[GameBoard] ERROR: starterItems list is NULL! Assign items in Inspector.");
                 return;
             }
 
             if (starterItems.Count == 0)
             {
-                Debug.LogError("[GameBoard] ? ERROR: starterItems list is EMPTY! Add items to 'Starter Items' list in GameBoard Inspector.");
-                Debug.LogError("[GameBoard] ?? HOW TO FIX: Select GameManager ? GameBoard component ? Set 'Starter Items' Size to 5 ? Drag G1_1, G1_1, G1_2, G1_3, G1_4");
+                Debug.LogError("[GameBoard] ERROR: starterItems list is EMPTY! Add items to 'Starter Items' list in GameBoard Inspector.");
+                Debug.LogError("[GameBoard] HOW TO FIX: Select GameManager ? GameBoard component ? Set 'Starter Items' Size to 5 ? Drag G1_1, G1_1, G1_2, G1_3, G1_4");
                 return;
             }
 
-            Debug.Log($"[GameBoard] ? Starter items list has {starterItems.Count} items");
+            Debug.Log($"[GameBoard] Starter items list has {starterItems.Count} items");
 
             // Show what's in the list
             for (int i = 0; i < starterItems.Count; i++)
@@ -99,7 +99,7 @@ public class GameBoard : MonoBehaviour
                 if (starterItems[i] != null)
                     Debug.Log($"[GameBoard]   Element {i}: {starterItems[i].itemID} (Level {starterItems[i].level})");
                 else
-                    Debug.LogWarning($"[GameBoard]   Element {i}: NULL ??");
+                    Debug.LogWarning($"[GameBoard]   Element {i}: NULL ");
             }
 
             // Define starting positions for up to 5 items
@@ -112,7 +112,7 @@ public class GameBoard : MonoBehaviour
                 new Vector2Int(3, 4)  // Position 4: Row 3, Col 4
             };
 
-            Debug.Log($"[GameBoard] ?? Starting item creation loop...");
+            Debug.Log($"[GameBoard] Starting item creation loop...");
 
             // Create items at their positions
             int successCount = 0;
@@ -122,33 +122,33 @@ public class GameBoard : MonoBehaviour
 
                 if (itemData == null)
                 {
-                    Debug.LogWarning($"[GameBoard] ?? Starter item at index {i} is NULL - skipping this position");
+                    Debug.LogWarning($"[GameBoard] Starter item at index {i} is NULL - skipping this position");
                     continue;
                 }
 
                 Vector2Int pos = startPositions[i];
-                Debug.Log($"[GameBoard] ?? Creating {itemData.itemID} (Level {itemData.level}) at position ({pos.x}, {pos.y})...");
+                Debug.Log($"[GameBoard]  Creating {itemData.itemID} (Level {itemData.level}) at position ({pos.x}, {pos.y})...");
 
                 BoardItem createdItem = CreateItem(itemData, grid[pos.x, pos.y]);
 
                 if (createdItem != null)
                 {
                     successCount++;
-                    Debug.Log($"[GameBoard] ? SUCCESS! Created {itemData.itemID} at ({pos.x}, {pos.y})");
+                    Debug.Log($"[GameBoard] SUCCESS! Created {itemData.itemID} at ({pos.x}, {pos.y})");
                 }
                 else
                 {
-                    Debug.LogError($"[GameBoard] ? FAILED to create {itemData.itemID} at ({pos.x}, {pos.y})");
+                    Debug.LogError($"[GameBoard] FAILED to create {itemData.itemID} at ({pos.x}, {pos.y})");
                 }
             }
 
-            Debug.Log($"[GameBoard] ?? Starting item creation complete!");
-            Debug.Log($"[GameBoard] ?? Created {successCount} out of {starterItems.Count} items");
-            Debug.Log($"[GameBoard] ?? Total items on board: {activeItems.Count}");
+            Debug.Log($"[GameBoard] Starting item creation complete!");
+            Debug.Log($"[GameBoard] Created {successCount} out of {starterItems.Count} items");
+            Debug.Log($"[GameBoard] Total items on board: {activeItems.Count}");
 
             if (successCount < starterItems.Count)
             {
-                Debug.LogWarning($"[GameBoard] ?? Some items failed to create! Check above logs for details.");
+                Debug.LogWarning($"[GameBoard] Some items failed to create! Check above logs for details.");
             }
         }
         else
@@ -206,21 +206,21 @@ public class GameBoard : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[GameBoard] Items cannot merge - Swapping positions");
-                // Swap items
+                Debug.Log($"[GameBoard] Items cannot merge - Different family or level");
+                Debug.Log($"[GameBoard] Swapping positions instead");
+
+                // Swap the items
                 SwapItems(draggedItem, targetItem);
             }
         }
         else if (targetCell.currentItem == null)
         {
             Debug.Log($"[GameBoard] Target cell is empty - Moving item");
-            // Move to empty cell
             MoveItemToCell(draggedItem, targetCell);
         }
         else
         {
             Debug.Log($"[GameBoard] Item dropped on itself - Returning to original");
-            // Dropped on itself, return to original position
             draggedItem.ReturnToOriginalPosition();
         }
     }
@@ -296,26 +296,90 @@ public class GameBoard : MonoBehaviour
 
         Debug.Log($"[GameBoard] Swapping: {item1.itemData.itemID} at ({cell1.row},{cell1.column}) ? {item2.itemData.itemID} at ({cell2.row},{cell2.column})");
 
-        // Animate the swap
-        Vector3 pos1 = item1.transform.position;
-        Vector3 pos2 = item2.transform.position;
+        // CRITICAL SAFETY CHECK: Verify no other items in cells
+        if (cell1.currentItem != item1)
+        {
+            Debug.LogError($"[GameBoard] SAFETY ERROR: Cell1 ({cell1.row},{cell1.column}) currentItem mismatch!");
+            return;
+        }
 
-        // Move item1 to cell2's position, then to cell2
+        if (cell2.currentItem != item2)
+        {
+            Debug.LogError($"[GameBoard] SAFETY ERROR: Cell2 ({cell2.row},{cell2.column}) currentItem mismatch!");
+            return;
+        }
+
+        // STEP 1: Completely clear both cells FIRST
+        cell1.currentItem = null;
+        cell2.currentItem = null;
+        Debug.Log($"[GameBoard] Step 1: Cleared both cells");
+
+        // STEP 2: Immediately update item references (NO animation yet)
+        item1.currentCell = cell2;
+        item2.currentCell = cell1;
+        Debug.Log($"[GameBoard] Step 2: Updated item.currentCell references");
+
+        // STEP 3: Immediately update cell references (BEFORE animation)
+        cell1.currentItem = item2;
+        cell2.currentItem = item1;
+        Debug.Log($"[GameBoard] Step 3: Updated cell.currentItem references");
+
+        // STEP 4: Get positions for animation
+        Vector3 pos1 = cell1.transform.position;
+        Vector3 pos2 = cell2.transform.position;
+
+        // STEP 5: Parent items to their NEW cells BEFORE animation
+        item1.transform.SetParent(cell2.transform);
+        item2.transform.SetParent(cell1.transform);
+        Debug.Log($"[GameBoard] Step 4: Reparented items to new cells");
+
+        // STEP 6: Now animate from current position to new local position
+        // Move item1 to center of cell2
         item1.transform.DOMove(pos2, 0.3f).SetEase(Ease.OutQuad).OnComplete(() => {
-            item1.MoveToCell(cell2);
+            item1.transform.localPosition = Vector3.zero;
+            item1.transform.localScale = Vector3.one;
+            Debug.Log($"[GameBoard] {item1.itemData.itemID} animation complete at ({cell2.row},{cell2.column})");
+
+            // SAFETY CHECK after animation
+            if (cell2.currentItem != item1)
+            {
+                Debug.LogError($"[GameBoard] POST-ANIMATION ERROR: Cell2 lost item1 reference!");
+                cell2.currentItem = item1;
+            }
         });
 
-        // Move item2 to cell1's position, then to cell1
+        // Move item2 to center of cell1
         item2.transform.DOMove(pos1, 0.3f).SetEase(Ease.OutQuad).OnComplete(() => {
-            item2.MoveToCell(cell1);
+            item2.transform.localPosition = Vector3.zero;
+            item2.transform.localScale = Vector3.one;
+            Debug.Log($"[GameBoard] {item2.itemData.itemID} animation complete at ({cell1.row},{cell1.column})");
+
+            // SAFETY CHECK after animation
+            if (cell1.currentItem != item2)
+            {
+                Debug.LogError($"[GameBoard] POST-ANIMATION ERROR: Cell1 lost item2 reference!");
+                cell1.currentItem = item2;
+            }
         });
 
-        Debug.Log($"[GameBoard] Swap animation started");
+        Debug.Log($"[GameBoard] Swap complete - Each cell has exactly 1 item assigned");
+        Debug.Log($"[GameBoard]   Cell ({cell1.row},{cell1.column}) ? {cell1.currentItem.itemData.itemID}");
+        Debug.Log($"[GameBoard]   Cell ({cell2.row},{cell2.column}) ? {cell2.currentItem.itemData.itemID}");
     }
 
     void MoveItemToCell(BoardItem item, GridCell targetCell)
     {
         Debug.Log($"[GameBoard] Moving {item.itemData.itemID} from ({item.currentCell.row}, {item.currentCell.column}) to ({targetCell.row}, {targetCell.column})");
+
+        // SAFETY CHECK: Make sure target cell is actually empty
+        if (targetCell.currentItem != null)
+        {
+            Debug.LogError($"[GameBoard] CRITICAL ERROR: Target cell ({targetCell.row}, {targetCell.column}) is NOT EMPTY!");
+            Debug.LogError($"[GameBoard] Cell contains: {targetCell.currentItem.itemData.itemID}");
+            Debug.LogError($"[GameBoard] Aborting move to prevent overlap!");
+            item.ReturnToOriginalPosition();
+            return;
+        }
 
         // Clear the old cell
         if (item.currentCell != null)
@@ -330,7 +394,8 @@ public class GameBoard : MonoBehaviour
         item.currentCell = targetCell;
         targetCell.currentItem = item;
 
-        Debug.Log($"[GameBoard] ? Item successfully moved to ({targetCell.row}, {targetCell.column})");
+        Debug.Log($"[GameBoard] Item successfully moved to ({targetCell.row}, {targetCell.column})");
+        Debug.Log($"[GameBoard] Verification: Cell ({targetCell.row}, {targetCell.column}) contains {targetCell.currentItem.itemData.itemID}");
     }
 
     public GridCell FindEmptyAdjacentCell(GridCell sourceCell)
@@ -382,13 +447,86 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        Debug.Log($"[GameBoard] ?? BOARD IS COMPLETELY FULL!");
+        Debug.Log($"[GameBoard] BOARD IS COMPLETELY FULL!");
         return false;
     }
 
     bool IsValidCell(int row, int col)
     {
         return row >= 0 && row < boardSize && col >= 0 && col < boardSize;
+    }
+
+    // ==================== DEBUGGING & VALIDATION ====================
+
+    [ContextMenu("Validate Board State")]
+    public void ValidateBoardState()
+    {
+        Debug.Log("[GameBoard] Validating board state...");
+
+        int totalItems = 0;
+        int overlaps = 0;
+
+        for (int row = 0; row < boardSize; row++)
+        {
+            for (int col = 0; col < boardSize; col++)
+            {
+                GridCell cell = grid[row, col];
+
+                if (cell.currentItem != null)
+                {
+                    totalItems++;
+
+                    // Check if item thinks it's in this cell
+                    if (cell.currentItem.currentCell != cell)
+                    {
+                        Debug.LogError($"[GameBoard] MISMATCH at ({row},{col}): Cell has {cell.currentItem.itemData.itemID} but item thinks it's in cell ({cell.currentItem.currentCell.row},{cell.currentItem.currentCell.column})");
+                        overlaps++;
+                    }
+
+                    // Check if parent is correct
+                    if (cell.currentItem.transform.parent != cell.transform)
+                    {
+                        Debug.LogError($"[GameBoard] PARENT MISMATCH at ({row},{col}): Item parent is {cell.currentItem.transform.parent.name}, should be {cell.name}");
+                        overlaps++;
+                    }
+
+                    // Count children in cell
+                    int childCount = 0;
+                    foreach (Transform child in cell.transform)
+                    {
+                        if (child.GetComponent<BoardItem>() != null)
+                            childCount++;
+                    }
+
+                    if (childCount > 1)
+                    {
+                        Debug.LogError($"[GameBoard] OVERLAP at ({row},{col}): Cell has {childCount} BoardItem children!");
+                        overlaps++;
+
+                        // List all items in this cell
+                        foreach (Transform child in cell.transform)
+                        {
+                            BoardItem item = child.GetComponent<BoardItem>();
+                            if (item != null)
+                            {
+                                Debug.LogError($"[GameBoard]   - Item: {item.itemData.itemID}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"[GameBoard] Validation complete: {totalItems} items found, {overlaps} issues detected");
+
+        if (overlaps > 0)
+        {
+            Debug.LogError($"[GameBoard] BOARD HAS {overlaps} OVERLAP/MISMATCH ISSUES!");
+        }
+        else
+        {
+            Debug.Log($"[GameBoard] Board state is VALID - No overlaps!");
+        }
     }
 
     // ==================== SAVE/LOAD SYSTEM ====================
@@ -432,7 +570,7 @@ public class GameBoard : MonoBehaviour
         string path = Application.persistentDataPath + "/boardState.json";
         System.IO.File.WriteAllText(path, json);
 
-        Debug.Log($"[GameBoard] ?? Game state saved! ({activeItems.Count} items)");
+        Debug.Log($"[GameBoard] Game state saved! ({activeItems.Count} items)");
         Debug.Log($"[GameBoard] Save location: {path}");
     }
 
@@ -442,7 +580,7 @@ public class GameBoard : MonoBehaviour
 
         if (System.IO.File.Exists(path))
         {
-            Debug.Log($"[GameBoard] ?? Loading game state from: {path}");
+            Debug.Log($"[GameBoard] Loading game state from: {path}");
 
             string json = System.IO.File.ReadAllText(path);
             BoardState state = JsonUtility.FromJson<BoardState>(json);
@@ -465,7 +603,7 @@ public class GameBoard : MonoBehaviour
                 }
             }
 
-            Debug.Log($"[GameBoard] ? Game state loaded successfully!");
+            Debug.Log($"[GameBoard] Game state loaded successfully!");
         }
         else
         {
@@ -481,7 +619,7 @@ public class GameBoard : MonoBehaviour
         if (System.IO.File.Exists(path))
         {
             System.IO.File.Delete(path);
-            Debug.Log("[GameBoard] ??? Save data cleared!");
+            Debug.Log("[GameBoard] Save data cleared!");
         }
         else
         {
@@ -502,5 +640,4 @@ public class ItemState
     public string itemID;
     public int row;
     public int column;
-    // Production timer removed - no longer needed for click-based production
 }

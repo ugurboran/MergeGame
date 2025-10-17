@@ -227,9 +227,9 @@ MonoBehaviour:
   starterItems:
   - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
   - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
+  - {fileID: 11400000, guid: 4250795409af61d4fa87cd9e3d7b8958, type: 2}
   - {fileID: 11400000, guid: 52a90c0ef7675e54eb84657d231730fc, type: 2}
   - {fileID: 11400000, guid: 2fdb758689acba44abd1eeef76c81c74, type: 2}
-  - {fileID: 11400000, guid: 4824709e85299c340a4b051f22331ad4, type: 2}
   allItemData:
   - {fileID: 11400000, guid: a4bc5b80091b0894eb542778e87b195b, type: 2}
   - {fileID: 11400000, guid: 4250795409af61d4fa87cd9e3d7b8958, type: 2}
