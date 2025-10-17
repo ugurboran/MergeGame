@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemID: P1_6
   level: 6
-  sprite: {fileID: 0}
+  sprite: {fileID: 21300000, guid: 675d98efbf3cfcc4c8a28912093d6acf, type: 3}
   itemType: 1
   familyID: P1
   isGenerator: 0

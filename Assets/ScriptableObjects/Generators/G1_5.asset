@@ -20,9 +20,9 @@ MonoBehaviour:
   isGenerator: 1
   productionTime: 5
   productionChances:
-  - productData: {fileID: 0}
+  - productData: {fileID: 11400000, guid: 4a8515f3f550ae94bac215163c607f8e, type: 2}
     chance: 86
-  - productData: {fileID: 0}
+  - productData: {fileID: 11400000, guid: 3c980d708e0504749801b8bdcd401d50, type: 2}
     chance: 8
-  - productData: {fileID: 0}
+  - productData: {fileID: 11400000, guid: d04a969c08a2da8448775d8d4c3aeb9d, type: 2}
     chance: 6

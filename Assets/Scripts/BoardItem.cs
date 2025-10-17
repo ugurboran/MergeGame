@@ -4,12 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
+using TMPro;
 
 public class BoardItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public ItemData itemData;
     public Image itemImage;
-    public Text levelText;
+    public TextMeshProUGUI levelText;
     public GridCell currentCell;
 
     private Canvas canvas;
